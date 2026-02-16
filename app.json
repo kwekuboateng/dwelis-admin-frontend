@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Dwelis Admin",
+    "slug": "dwelis-admin",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": ["web"],
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "apiBaseUrl": "https://dwelis-backend.onrender.com",
+      "apiBaseUrlDev": "http://localhost:4001"
+    }
+  }
+}
