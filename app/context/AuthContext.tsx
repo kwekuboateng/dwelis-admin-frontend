@@ -45,7 +45,7 @@ const getApiBaseUrl = () => {
     const url = (globalThis as any).__DEV__ ? extra.apiBaseUrlDev : extra.apiBaseUrl;
     if (url) return (url as string).replace(/\/$/, '');
   }
-  return (globalThis as any).__DEV__ ? 'http://localhost:4001' : 'https://dwelis-backend.onrender.com';
+  return (globalThis as any).__DEV__ ? 'http://localhost:4001' : 'https://api.dwelis.com';
 };
 
 const api = axios.create({ baseURL: getApiBaseUrl() });

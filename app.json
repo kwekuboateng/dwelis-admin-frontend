@@ -10,7 +10,7 @@
       "bundler": "metro"
     },
     "extra": {
-      "apiBaseUrl": "https://dwelis-backend.onrender.com",
+      "apiBaseUrl": "https://api.dwelis.com",
       "apiBaseUrlDev": "http://localhost:4001"
     }
   }

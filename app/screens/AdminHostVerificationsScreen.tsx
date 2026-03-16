@@ -33,13 +33,13 @@ type PendingVerification = {
 export const AdminHostVerificationsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
   const [list, setList] = useState<PendingVerification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = !!user && (user.role?.startsWith('admin') || (roles && roles.includes('admin')));
 
   const load = useCallback(async () => {
     if (!isAdmin) return;

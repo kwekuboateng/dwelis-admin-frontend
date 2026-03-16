@@ -41,7 +41,10 @@ export const AdminSignupScreen: React.FC = () => {
         // First admin created - AuthContext updates user, AdminApp re-renders and shows AdminStack
       }
     } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Sign up failed. Email may already be in use.');
+      const backendMessage = e?.response?.data?.message;
+      const fallbackMessage =
+        e?.message ?? 'Sign up failed. Please check your connection or backend logs.';
+      setError(typeof backendMessage === 'string' ? backendMessage : fallbackMessage);
     } finally {
       setLoading(false);
     }

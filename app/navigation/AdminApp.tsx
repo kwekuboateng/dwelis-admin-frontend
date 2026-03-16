@@ -3,7 +3,15 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 import { AdminHostVerificationsScreen } from '../screens/AdminHostVerificationsScreen';
+import { AdminListingsPendingScreen } from '../screens/AdminListingsPendingScreen';
+import { AdminUsersScreen } from '../screens/AdminUsersScreen';
+import { AdminBookingsScreen } from '../screens/AdminBookingsScreen';
+import { AdminFinanceScreen } from '../screens/AdminFinanceScreen';
+import { AdminReportsScreen } from '../screens/AdminReportsScreen';
+import { AdminAuditLogsScreen } from '../screens/AdminAuditLogsScreen';
+import { AdminSettingsScreen } from '../screens/AdminSettingsScreen';
 import { AdminSignupScreen } from '../screens/AdminSignupScreen';
 import { AdminLoginScreen } from '../screens/AdminLoginScreen';
 import { AdminVerifyEmailScreen } from '../screens/AdminVerifyEmailScreen';
@@ -25,11 +33,15 @@ const screenOptions = {
 function AdminStack() {
   return (
     <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen
-        name="AdminHome"
-        component={AdminHostVerificationsScreen}
-        options={{ title: 'Host verifications' }}
-      />
+      <Stack.Screen name="AdminHome" component={AdminDashboardScreen} options={{ title: 'Dashboard' }} />
+      <Stack.Screen name="AdminUsers" component={AdminUsersScreen} options={{ title: 'Users' }} />
+      <Stack.Screen name="AdminListingsPending" component={AdminListingsPendingScreen} options={{ title: 'Pending listings' }} />
+      <Stack.Screen name="AdminHostVerifications" component={AdminHostVerificationsScreen} options={{ title: 'Host verifications' }} />
+      <Stack.Screen name="AdminBookings" component={AdminBookingsScreen} options={{ title: 'Bookings' }} />
+      <Stack.Screen name="AdminFinance" component={AdminFinanceScreen} options={{ title: 'Finance' }} />
+      <Stack.Screen name="AdminReports" component={AdminReportsScreen} options={{ title: 'Reports' }} />
+      <Stack.Screen name="AdminAuditLogs" component={AdminAuditLogsScreen} options={{ title: 'Audit logs' }} />
+      <Stack.Screen name="AdminSettings" component={AdminSettingsScreen} options={{ title: 'Settings' }} />
       <Stack.Screen name="AdminSignup" component={AdminSignupScreen} options={{ title: 'Create admin' }} />
       <Stack.Screen name="Login" component={AdminLoginScreen} options={{ title: 'Log in' }} />
     </Stack.Navigator>

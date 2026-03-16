@@ -7,12 +7,20 @@ import { Text, StyleSheet, TextStyle } from 'react-native';
 const ICONS: Record<string, string> = {
   'arrow-back': '←',
   'person': '●',
+  'people': '👥',
   'log-out-outline': '↪',
   'lock-closed': '🔒',
   'checkmark-circle-outline': '✓',
+  'checkmark-circle': '✓',
   'close': '✕',
   'eye': '👁',
   'eye-off': '⊘',
+  'home': '⌂',
+  'calendar': '📅',
+  'cash': '₵',
+  'flag': '⚑',
+  'settings': '⚙',
+  'chevron-forward': '›',
 };
 
 type IconProps = {

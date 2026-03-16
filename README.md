@@ -37,7 +37,7 @@ Output goes to `dist/`.
 
 ## Environment
 
-- `EXPO_PUBLIC_API_URL` – Override API URL (default: from app.json, production: https://dwelis-backend.onrender.com)
+- `EXPO_PUBLIC_API_URL` – Override API URL (default: from app.json, production: https://api.dwelis.com)
 
 ## Troubleshooting
 
