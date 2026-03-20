@@ -199,6 +199,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
     const { accessToken, refreshToken, user: userData } = res.data;
+
+    // Admin app: only allow admin users to log in
+    const role = userData?.role;
+    if (!role || !role.toLowerCase().startsWith('admin')) {
+      await clearAuth();
+      const err: any = new Error('Only admin accounts can sign in here.');
+      err.code = 'NON_ADMIN';
+      throw err;
+    }
+
     await persistAuth(accessToken, refreshToken, userData);
     await fetchRoles();
   };

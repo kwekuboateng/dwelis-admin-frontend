@@ -21,6 +21,8 @@ const ICONS: Record<string, string> = {
   'flag': '⚑',
   'settings': '⚙',
   'chevron-forward': '›',
+  /** Listing ownership transfer */
+  swap: '⇄',
 };
 
 type IconProps = {

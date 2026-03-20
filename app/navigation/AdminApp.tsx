@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 import { AdminHostVerificationsScreen } from '../screens/AdminHostVerificationsScreen';
+import { AdminListingTransfersScreen } from '../screens/AdminListingTransfersScreen';
 import { AdminListingsPendingScreen } from '../screens/AdminListingsPendingScreen';
 import { AdminUsersScreen } from '../screens/AdminUsersScreen';
 import { AdminBookingsScreen } from '../screens/AdminBookingsScreen';
@@ -37,6 +38,7 @@ function AdminStack() {
       <Stack.Screen name="AdminUsers" component={AdminUsersScreen} options={{ title: 'Users' }} />
       <Stack.Screen name="AdminListingsPending" component={AdminListingsPendingScreen} options={{ title: 'Pending listings' }} />
       <Stack.Screen name="AdminHostVerifications" component={AdminHostVerificationsScreen} options={{ title: 'Host verifications' }} />
+      <Stack.Screen name="AdminListingTransfers" component={AdminListingTransfersScreen} options={{ title: 'Listing transfers' }} />
       <Stack.Screen name="AdminBookings" component={AdminBookingsScreen} options={{ title: 'Bookings' }} />
       <Stack.Screen name="AdminFinance" component={AdminFinanceScreen} options={{ title: 'Finance' }} />
       <Stack.Screen name="AdminReports" component={AdminReportsScreen} options={{ title: 'Reports' }} />
@@ -62,6 +64,8 @@ export function AdminApp() {
   const { user, isLoading } = useAuth();
   const insets = useSafeAreaInsets();
 
+  const isAdmin = !!user && user.role?.toLowerCase().startsWith('admin');
+
   if (isLoading) {
     return (
       <View style={[styles.loading, { paddingTop: insets.top }]}>
@@ -70,7 +74,7 @@ export function AdminApp() {
     );
   }
 
-  return user ? (
+  return isAdmin ? (
     <AdminStack key={`auth-${user.id}`} />
   ) : (
     <LoginStack key="guest" />

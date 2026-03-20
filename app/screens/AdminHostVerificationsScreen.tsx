@@ -6,8 +6,8 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -77,28 +77,16 @@ export const AdminHostVerificationsScreen: React.FC = () => {
   };
 
   const reject = async (id: string) => {
-    Alert.alert(
-      'Reject host',
-      'Are you sure you want to reject this host verification?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reject',
-          style: 'destructive',
-          onPress: async () => {
-            setActingId(id);
-            try {
-              await api.patch(`/admin/host-verifications/${id}/reject`);
-              await load();
-            } catch (e: any) {
-              Alert.alert('Error', e.response?.data?.message || 'Could not reject');
-            } finally {
-              setActingId(null);
-            }
-          },
-        },
-      ],
-    );
+    setActingId(id);
+    try {
+      await api.patch(`/admin/host-verifications/${id}/reject`);
+      await load();
+    } catch (e: any) {
+      // On web, native Alert can be unreliable; use a simple fallback
+      console.error('Failed to reject host verification', e?.response?.data || e);
+    } finally {
+      setActingId(null);
+    }
   };
 
   if (!isAdmin) {
@@ -162,7 +150,7 @@ export const AdminHostVerificationsScreen: React.FC = () => {
           <View key={item.id} style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardName}>
-                {item.user?.fullName || item.user?.email || 'Unknown'}
+                {item.user?.fullName || item.user?.email || item.user?.phoneNumber || 'Unknown'}
               </Text>
               {item.user?.email ? (
                 <Text style={styles.cardEmail}>{item.user.email}</Text>
