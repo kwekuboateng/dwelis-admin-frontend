@@ -26,6 +26,14 @@ type BookingItem = {
   listing?: { title?: string };
 };
 
+function showError(message: string) {
+  if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+    window.alert(message);
+    return;
+  }
+  Alert.alert('Error', message);
+}
+
 export const AdminBookingsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { user, roles } = useAuth();
@@ -54,17 +62,36 @@ export const AdminBookingsScreen: React.FC = () => {
     try {
       await api.post(`/admin/bookings/${id}/cancel`, { reason });
       await load();
-    } catch (e: any) { Alert.alert('Error', e.response?.data?.message || 'Could not cancel'); } finally { setActingId(null); }
+    } catch (e: any) { showError(e.response?.data?.message || 'Could not cancel'); } finally { setActingId(null); }
   };
 
   const adminRevertCancellation = async (id: string) => {
     const note = getReason('Optional note for audit log?', 'Restored after mistaken cancellation');
+    let restoreAs: string | undefined;
+    if (typeof window !== 'undefined' && typeof (window as any).prompt === 'function') {
+      const picked = (window as any).prompt(
+        'Restore as status (leave blank to auto-detect): confirmed | pending_payment | pending_payment_verification',
+        'confirmed',
+      );
+      if (picked === null) return;
+      const normalized = picked.trim().toLowerCase();
+      if (normalized) restoreAs = normalized;
+    }
     setActingId(id);
     try {
-      await api.post(`/admin/bookings/${id}/revert-cancellation`, { note });
+      await api.post(`/admin/bookings/${id}/revert-cancellation`, {
+        note,
+        ...(restoreAs ? { restoreAs } : {}),
+      });
       await load();
     } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.message || 'Could not restore booking');
+      const message =
+        e.response?.data?.message ||
+        (Array.isArray(e.response?.data?.message)
+          ? e.response.data.message.join(', ')
+          : null) ||
+        'Could not restore booking';
+      showError(message);
     } finally {
       setActingId(null);
     }
