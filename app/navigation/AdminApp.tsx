@@ -7,11 +7,15 @@ import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 import { AdminHostVerificationsScreen } from '../screens/AdminHostVerificationsScreen';
 import { AdminListingTransfersScreen } from '../screens/AdminListingTransfersScreen';
 import { AdminListingsPendingScreen } from '../screens/AdminListingsPendingScreen';
+import { AdminListingsScreen } from '../screens/AdminListingsScreen';
+import { AdminListingDetailScreen } from '../screens/AdminListingDetailScreen';
 import { AdminUsersScreen } from '../screens/AdminUsersScreen';
 import { AdminBookingsScreen } from '../screens/AdminBookingsScreen';
 import { AdminFinanceScreen } from '../screens/AdminFinanceScreen';
 import { AdminReportsScreen } from '../screens/AdminReportsScreen';
 import { AdminAuditLogsScreen } from '../screens/AdminAuditLogsScreen';
+import { AdminGuestFavoritesScreen } from '../screens/AdminGuestFavoritesScreen';
+import { AdminOperationsTasksScreen } from '../screens/AdminOperationsTasksScreen';
 import { AdminSettingsScreen } from '../screens/AdminSettingsScreen';
 import { AdminSignupScreen } from '../screens/AdminSignupScreen';
 import { AdminLoginScreen } from '../screens/AdminLoginScreen';
@@ -36,6 +40,8 @@ function AdminStack() {
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="AdminHome" component={AdminDashboardScreen} options={{ title: 'Dashboard' }} />
       <Stack.Screen name="AdminUsers" component={AdminUsersScreen} options={{ title: 'Users' }} />
+      <Stack.Screen name="AdminListings" component={AdminListingsScreen} options={{ title: 'Listings' }} />
+      <Stack.Screen name="AdminListingDetail" component={AdminListingDetailScreen} options={{ title: 'Listing' }} />
       <Stack.Screen name="AdminListingsPending" component={AdminListingsPendingScreen} options={{ title: 'Pending listings' }} />
       <Stack.Screen name="AdminHostVerifications" component={AdminHostVerificationsScreen} options={{ title: 'Host verifications' }} />
       <Stack.Screen name="AdminListingTransfers" component={AdminListingTransfersScreen} options={{ title: 'Listing transfers' }} />
@@ -43,6 +49,16 @@ function AdminStack() {
       <Stack.Screen name="AdminFinance" component={AdminFinanceScreen} options={{ title: 'Finance' }} />
       <Stack.Screen name="AdminReports" component={AdminReportsScreen} options={{ title: 'Reports' }} />
       <Stack.Screen name="AdminAuditLogs" component={AdminAuditLogsScreen} options={{ title: 'Audit logs' }} />
+      <Stack.Screen
+        name="AdminGuestFavorites"
+        component={AdminGuestFavoritesScreen}
+        options={{ title: 'Guest Favorite Rankings' }}
+      />
+      <Stack.Screen
+        name="AdminOperationsTasks"
+        component={AdminOperationsTasksScreen}
+        options={{ title: 'Operations tasks' }}
+      />
       <Stack.Screen name="AdminSettings" component={AdminSettingsScreen} options={{ title: 'Settings' }} />
       <Stack.Screen name="AdminSignup" component={AdminSignupScreen} options={{ title: 'Create admin' }} />
       <Stack.Screen name="Login" component={AdminLoginScreen} options={{ title: 'Log in' }} />

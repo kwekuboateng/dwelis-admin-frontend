@@ -1,48 +1,78 @@
 # Dwelis Admin
 
-Standalone admin UI for Dwelis. Deploy separately and point `admin.dwelis.com` to this app.
+Standalone **admin dashboard** for Dwelis operations: listing moderation, host verification, reservations, and finance. Deployed separately from the main guest/host app.
+
+Production: `https://admin.dwelis.com`
+
+## Stack
+
+- **Expo 51** (web-focused)
+- **React Navigation**
+- **Axios** → Dwelis API (`EXPO_PUBLIC_API_URL`)
+
+## Prerequisites
+
+- Node.js **18+**
+- Backend API running (local or production)
+- Admin user account (role `admin` in the database)
 
 ## Setup
 
 ```bash
 cd admin
 npm install
-```
-
-## Development
-
-```bash
 npm run web
 ```
 
-Opens at http://localhost:8082 with **hot reload** (Fast Refresh). Changes to `app/` files update automatically.
+Opens at **http://localhost:8082** with hot reload.
 
-> If you hit **EMFILE: too many open files**, use `npm run serve` instead (no hot reload; re-run after changes).
-
-## Build for production
+Point at a local API:
 
 ```bash
-npm run build:web
+EXPO_PUBLIC_API_URL=http://localhost:4001 npm run web
 ```
 
-Output goes to `dist/`.
+## Scripts
 
-## Deploy to Netlify
-
-1. Create a new Netlify site (or use a subdomain of your existing site)
-2. Connect this `admin` folder as the root (or the repo containing it)
-3. Build command: `npm run build:web`
-4. Publish directory: `dist`
-5. Add custom domain: `admin.dwelis.com`
+| Command | Description |
+|---------|-------------|
+| `npm run web` | Dev server (port 8082) |
+| `npm run start:web` | Same, without file-watcher wrapper |
+| `npm run build:web` | Static export to `dist/` |
+| `npm run serve` | Serve `dist/` locally (no hot reload) |
+| `npm run build-and-serve` | Build + serve against localhost API |
 
 ## Environment
 
-- `EXPO_PUBLIC_API_URL` – Override API URL (default: from app.json, production: https://api.dwelis.com)
+| Variable | Purpose |
+|----------|---------|
+| `EXPO_PUBLIC_API_URL` | API base URL (default from `app.json`: `https://api.dwelis.com`) |
+
+## Deploy
+
+### Netlify
+
+1. Connect repo; set **root directory** to `admin`
+2. **Build command:** `npm run build:web`
+3. **Publish directory:** `dist`
+4. **Custom domain:** `admin.dwelis.com`
+5. Set `EXPO_PUBLIC_API_URL=https://api.dwelis.com` in Netlify env if needed
+
+### Other static hosts
+
+Run `npm run build:web` and upload `dist/`.
 
 ## Troubleshooting
 
-**EMFILE: too many open files** – Use the build-and-serve workflow instead:
+**EMFILE: too many open files** on macOS — use production-style serve instead of dev:
+
 ```bash
-npm run serve
+npm run build-and-serve
 ```
-Opens at http://localhost:8082. Re-run when you change code (no hot reload).
+
+Re-run after code changes (no Fast Refresh).
+
+## Related
+
+- API admin routes: see `backend/README.md` (`/admin/*`)
+- Main marketplace app: `../dwelis-frontend`

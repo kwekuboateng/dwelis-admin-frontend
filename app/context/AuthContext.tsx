@@ -50,6 +50,40 @@ const getApiBaseUrl = () => {
 
 const api = axios.create({ baseURL: getApiBaseUrl() });
 
+/** True when JWT `exp` is missing/unreadable or already past (with small skew). */
+function isAccessTokenExpired(accessToken: string, skewSeconds = 30): boolean {
+  try {
+    const parts = accessToken.split('.');
+    if (parts.length < 2 || typeof atob !== 'function') return true;
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded)) as { exp?: number };
+    if (typeof payload.exp !== 'number') return true;
+    return payload.exp * 1000 <= Date.now() + skewSeconds * 1000;
+  } catch {
+    return true;
+  }
+}
+
+/** Transport / server blips must not wipe a valid session. */
+function isTransientAuthError(err: unknown): boolean {
+  const e = err as { response?: { status?: number }; code?: string; message?: string };
+  const status = e?.response?.status;
+  if (status != null) {
+    return status !== 401 && status !== 403;
+  }
+  return (
+    e?.code === 'ERR_NETWORK' ||
+    e?.code === 'ECONNABORTED' ||
+    e?.code === 'ETIMEDOUT' ||
+    e?.message === 'Network Error' ||
+    /network|timeout|offline/i.test(String(e?.message ?? ''))
+  );
+}
+
+/** Serialize refresh across interceptor and bootstrap (token rotation). */
+let inFlightRefreshAuth: Promise<boolean> | null = null;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -76,20 +110,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getToken = useCallback(() => tokenRef.current, []);
 
-  const refreshAuth = useCallback(async (): Promise<boolean> => {
-    try {
-      const raw = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (!raw) return false;
-      const { refreshToken: storedRefresh } = JSON.parse(raw);
-      if (!storedRefresh) return false;
-      const res = await api.post('/auth/refresh', { refreshToken: storedRefresh });
-      const { accessToken, refreshToken, user: userData } = res.data;
-      await persistAuth(accessToken, refreshToken, userData);
-      return true;
-    } catch {
-      await clearAuth();
-      return false;
-    }
+  const refreshAuth = useCallback((): Promise<boolean> => {
+    if (inFlightRefreshAuth) return inFlightRefreshAuth;
+    inFlightRefreshAuth = (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+        if (!raw) return false;
+        const { refreshToken: storedRefresh } = JSON.parse(raw);
+        if (!storedRefresh) return false;
+        const res = await api.post('/auth/refresh', { refreshToken: storedRefresh });
+        const { accessToken, refreshToken, user: userData } = res.data;
+        await persistAuth(accessToken, refreshToken, userData);
+        return true;
+      } catch (err) {
+        if (isTransientAuthError(err)) {
+          return false;
+        }
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 401 || status === 403) {
+          await clearAuth();
+        }
+        return false;
+      }
+    })().finally(() => {
+      inFlightRefreshAuth = null;
+    });
+    return inFlightRefreshAuth;
   }, [persistAuth, clearAuth]);
 
   const fetchRoles = useCallback(async (): Promise<string[]> => {
@@ -135,28 +181,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => api.interceptors.request.eject(interceptorId);
   }, []);
 
-  // On 401: try refresh token, retry request; if refresh fails, clear auth
+  // On 401: try refresh token, retry request; logout only when refresh is truly invalid.
   useEffect(() => {
-    let refreshPromise: Promise<boolean> | null = null;
     const interceptorId = api.interceptors.response.use(
       (res) => res,
       async (err) => {
-        const original = err.config;
-        const isRefreshRequest = original?.url?.includes('/auth/refresh');
-        if (err?.response?.status === 401 && !original._retry && !isRefreshRequest) {
+        const original = err.config as (typeof err.config & { _retry?: boolean }) | undefined;
+        const url = typeof original?.url === 'string' ? original.url : '';
+        const isRefreshRequest = url.includes('/auth/refresh');
+
+        if (err?.response?.status === 401 && isRefreshRequest) {
+          await clearAuth();
+          return Promise.reject(err);
+        }
+
+        if (err?.response?.status === 401 && original && !original._retry && !isRefreshRequest) {
           original._retry = true;
           try {
-            refreshPromise ??= refreshAuth();
-            const ok = await refreshPromise;
+            const ok = await refreshAuth();
             if (ok) {
               original.headers = original.headers || {};
               original.headers.Authorization = `Bearer ${tokenRef.current}`;
               return api(original);
             }
           } catch {
-            /* refresh failed */
+            /* ignore */
           }
-          await clearAuth();
+          if (!tokenRef.current) {
+            await clearAuth();
+          }
         }
         return Promise.reject(err);
       },
@@ -178,15 +231,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(storedUser);
           api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
           if (refreshToken) {
-            const ok = await refreshAuth();
-            if (cancelled) return;
-            if (!ok) {
-              tokenRef.current = null;
-              setToken(null);
-              setUser(null);
-              delete api.defaults.headers.common.Authorization;
-              await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+            try {
+              await refreshAuth();
+            } catch {
+              // Offline / timeout: keep stored session.
             }
+            if (cancelled) return;
+            // refreshAuth clears only on invalid refresh; do not wipe on network failure.
+          } else if (isAccessTokenExpired(accessToken)) {
+            await clearAuth();
+            if (cancelled) return;
           }
           if (!cancelled && tokenRef.current) await fetchRoles();
         }
@@ -223,6 +277,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       code: code.trim(),
     });
     const { accessToken, refreshToken, user: userData } = res.data;
+    const role = userData?.role;
+    if (!role || !role.toLowerCase().startsWith('admin')) {
+      await clearAuth();
+      const err: any = new Error('Only admin accounts can sign in here.');
+      err.code = 'NON_ADMIN';
+      throw err;
+    }
     await persistAuth(accessToken, refreshToken, userData);
     await fetchRoles();
   };

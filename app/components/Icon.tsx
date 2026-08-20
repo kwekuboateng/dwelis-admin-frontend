@@ -19,6 +19,7 @@ const ICONS: Record<string, string> = {
   'calendar': '📅',
   'cash': '₵',
   'flag': '⚑',
+  'heart': '♥',
   'settings': '⚙',
   'chevron-forward': '›',
   /** Listing ownership transfer */

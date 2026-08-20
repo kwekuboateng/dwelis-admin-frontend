@@ -24,17 +24,23 @@ export const AdminUsersScreen: React.FC = () => {
   const [actingId, setActingId] = useState<string | null>(null);
   const isAdmin = !!user && (user.role?.startsWith('admin') || (roles && roles.includes('admin')));
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (searchQ?: string) => {
     if (!isAdmin) return;
     try {
       const params: Record<string, string> = { limit: '50' };
-      if (q.trim()) params.q = q.trim();
+      const query = (searchQ ?? q).trim();
+      if (query) params.q = query;
       const res = await api.get<{ items: UserItem[]; total: number }>('/admin/users', { params });
       setData(res.data || { items: [], total: 0 });
     } catch { setData({ items: [], total: 0 }); } finally { setLoading(false); setRefreshing(false); }
   }, [isAdmin, q]);
 
-  useEffect(() => { if (isAdmin) load(); else setLoading(false); }, [isAdmin, load]);
+  useEffect(() => {
+    if (isAdmin) void load('');
+    else setLoading(false);
+    // Initial load only — search runs on submit via onSubmitEditing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin]);
 
   const suspend = async (id: string) => {
     const reason = getReason('Reason for suspension?', 'Violation of policy');
@@ -74,7 +80,7 @@ export const AdminUsersScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.xxl }]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.primary} />}>
       <Text style={styles.title}>Users</Text>
-      <TextInput style={styles.search} placeholder="Search by email, name, phone" value={q} onChangeText={setQ} onSubmitEditing={load} />
+      <TextInput style={styles.search} placeholder="Search by email, name, phone" value={q} onChangeText={setQ} onSubmitEditing={() => void load()} />
       {loading && data.items.length === 0 ? <Text style={styles.muted}>Loading...</Text> : (
         <>
           <Text style={styles.subtitle}>{data.total} user(s)</Text>

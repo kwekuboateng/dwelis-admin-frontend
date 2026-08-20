@@ -58,10 +58,13 @@ export const AdminDashboardScreen: React.FC = () => {
 
   const links = [
     { name: 'Users', route: 'AdminUsers', icon: 'people' as const },
+    { name: 'Listings', route: 'AdminListings', icon: 'home' as const },
+    { name: 'Guest Favorites', route: 'AdminGuestFavorites', icon: 'heart' as const },
     { name: 'Pending listings', route: 'AdminListingsPending', icon: 'home' as const },
     { name: 'Host verifications', route: 'AdminHostVerifications', icon: 'checkmark-circle' as const },
     { name: 'Listing transfers', route: 'AdminListingTransfers', icon: 'swap' as const },
     { name: 'Bookings', route: 'AdminBookings', icon: 'calendar' as const },
+    { name: 'Operations tasks', route: 'AdminOperationsTasks', icon: 'checkmark-circle' as const },
     { name: 'Finance', route: 'AdminFinance', icon: 'cash' as const },
     { name: 'Reports', route: 'AdminReports', icon: 'flag' as const },
     { name: 'Audit logs', route: 'AdminAuditLogs', icon: 'eye' as const },

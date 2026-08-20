@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "bash -c 'ulimit -n 65536 2>/dev/null || ulimit -n 10240 2>/dev/null || true; exec bash scripts/start.sh'",
-    "start:web": "npx expo start --web --port 8082",
+    "start": "bash scripts/start.sh",
+    "start:web": "bash scripts/start.sh --web",
     "web": "bash scripts/start.sh --web",
     "build:web": "npx expo export --platform web",
-    "serve": "npx serve dist -p 8082",
+    "serve": "npx serve dist -p 8083",
     "build-and-serve": "EXPO_PUBLIC_API_URL=http://localhost:4001 npm run build:web && npm run serve"
   },
   "dependencies": {

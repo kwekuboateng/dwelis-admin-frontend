@@ -18,7 +18,7 @@ export const AdminSignupScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = !!user?.role?.toLowerCase().startsWith('admin');
 
   const handleSignup = async () => {
     if (password.length < 8) {
@@ -60,7 +60,7 @@ export const AdminSignupScreen: React.FC = () => {
             : 'First-time setup: create the first admin account. After that, only existing admins can create new ones.'}
         </Text>
 
-        <Text style={styles.label}>Full name (optional)</Text>
+        <Text style={styles.label}>Full name </Text>
         <TextInput
           style={styles.input}
           placeholder="Your name"

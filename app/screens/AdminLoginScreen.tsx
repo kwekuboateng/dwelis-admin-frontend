@@ -49,8 +49,9 @@ export const AdminLoginScreen: React.FC = () => {
         /* LoginStack has no AdminHome - AdminApp will switch to AdminStack */
       }
     } catch (e: any) {
-      const msg = e?.response?.data?.message ?? 'Invalid email or password';
-      setError(msg);
+      const msg =
+        e?.response?.data?.message ?? e?.message ?? 'Invalid email or password';
+      setError(typeof msg === 'string' ? msg : 'Invalid email or password');
     } finally {
       setLoading(false);
     }

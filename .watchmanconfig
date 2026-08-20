@@ -1,0 +1,8 @@
+{
+  "ignore_dirs": [
+    ".git",
+    ".expo",
+    "dist",
+    "node_modules/.cache"
+  ]
+}
